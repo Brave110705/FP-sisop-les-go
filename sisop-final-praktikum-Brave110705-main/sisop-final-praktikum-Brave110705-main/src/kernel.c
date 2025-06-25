@@ -72,4 +72,19 @@ void readSector(byte* buf, int sector) {
 }
 
 // TODO: 1. Implement writeSector function
-void writeSector(byte* buf, int sector) {}
+void writeSector(byte* buf, int sector) {
+  int ah = 0x03;                  
+  int al = 0x01;                  
+  int ch = div(sector, 36);       
+  int cl = mod(sector, 18) + 1;    
+  int dh = mod(div(sector, 18), 2);
+  int dl = 0x00;                  
+
+  interrupt(
+    0x13,                    
+    (ah << 8) | al,             
+    buf,                     
+    (ch << 8) | cl,          
+    (dh << 8) | dl 
+  );
+}
