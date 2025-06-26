@@ -11,6 +11,7 @@ unsigned int strlen(char* str);
 bool strcmp(char* str1, char* str2);
 void strcpy(char* dst, char* src);
 void clear(byte* buf, unsigned int size);
+bool strncmp(char* str1, char* str2, int n)
 
 /**
  * TODO: Add your general helper function here
