@@ -29,10 +29,65 @@ void shell() {
 }
 
 // TODO: 4. Implement printCWD function
-void printCWD(byte cwd) {}
+void printCWD(byte cwd) {
+    struct node_fs fs;
+    char* names[FS_MAX_NODE];
+    int depth = 0;
+    int i;
+
+    readSector(fs.nodes, FS_NODE_SECTOR_NUMBER);
+    readSector(fs.nodes + 32, FS_NODE_SECTOR_NUMBER + 1);
+
+    while (cwd != FS_NODE_P_ROOT && depth < FS_MAX_NODE) {
+        names[depth++] = fs.nodes[cwd].node_name;
+        cwd = fs.nodes[cwd].parent_index;
+    }
+
+    if (depth == 0) {
+        printString("/");
+        return;
+    }
+
+    for (i = depth - 1; i >= 0; i--) {
+        printString("/");
+        printString(names[i]);
+    }
+    printString("/");
+}
 
 // TODO: 5. Implement parseCommand function
-void parseCommand(char* buf, char* cmd, char arg[2][64]) {}
+void parseCommand(char* buf, char* cmd, char arg[2][64]) {
+  // this command will do string inside "" or '' the same, it will store the same
+  int buf_i = 0;
+  int copier_i = 0; // trachk the index of copy destination
+  int part = 0;
+
+  memset(cmd,(byte)'\0',64);
+  memset(arg[0],(byte)'\0',64);
+  memset(arg[1],(byte)'\0',64);
+
+  while (buf[buf_i] != '\0') {
+    if (33 <= (int)buf[buf_i] && (int)buf[buf_i] <= 127 ) {
+      // non space
+      if (part == 0) {
+        cmd[copier_i] = buf[buf_i];
+      } else if (part > 0) {
+        arg[part-1][copier_i] = buf[buf_i]; 
+      }
+      copier_i++;
+    } else if ((int)buf[buf_i] == (int)' ') {
+      // printString("ada spasi\n");
+      // space
+      if (part == 0) {
+        cmd[copier_i] ='\0';
+      }
+      copier_i = 0; // reset to make new
+      part+=1;
+    }
+    buf_i++;
+  }
+
+}
 
 // TODO: 6. Implement cd function
 void cd(byte* cwd, char* dirname) {
