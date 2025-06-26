@@ -20,9 +20,10 @@ void fsRead(struct file_metadata* metadata, enum fs_return* status) {
   int i, j; //buat loop
   int ada = 0; //sesuai nama, kalok ada = 1
   int node_index = -1; //buat nyari index, mulai dari -1 sesuai ketentuanny
+  byte data_index;
 
   readSector(&(node_fs_buf.nodes[0]), FS_NODE_SECTOR_NUMBER);        
-  readSector(&(node_fs_buf.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);   
+  readSector(&(node_fs_buf.nodes[32]), FS_NODE_SECTOR_NUMBER);   
   readSector(&data_fs_buf, FS_DATA_SECTOR_NUMBER);                   
 
   //sesuai soal, cari secara iteratif "mencari node yang memiliki nama yang sesuai dengan metadata->node_name dan parent index sesuai dengan metadata->parent_index"
@@ -50,7 +51,7 @@ void fsRead(struct file_metadata* metadata, enum fs_return* status) {
 
   // ngikut soal
   metadata->filesize = 0;
-  byte data_index = node_fs_buf.nodes[node_index].data_index;
+  data_index = node_fs_buf.nodes[node_index].data_index;
 
   //ngikut soal, secara iteratif pake readSector buat baca data dari sektor yang ditunjuk oleh data pada data index dengan sectors ke-i 
   for (i = 0; i < FS_MAX_SECTOR; i++) {
