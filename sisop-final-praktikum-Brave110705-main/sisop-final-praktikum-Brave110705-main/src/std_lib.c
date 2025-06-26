@@ -54,6 +54,12 @@ bool strncmp(char* str1, char* str2, int n) {
     if (str1[i] != str2[i]) return false;
     i++;
   }
+
+void memset(byte* dst, byte tgt, unsigned int size) {
+  unsigned int i;
+  for (i = 0; i < size; i++) dst[i] = tgt;
+}
+
   return str1[i] == str2[i];
 }
 
