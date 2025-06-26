@@ -123,7 +123,46 @@ void cd(byte* cwd, char* dirname) {
 }
 
 // TODO: 7. Implement ls function
-void ls(byte cwd, char* dirname) {}
+void ls(byte cwd, char* dirname) {
+  struct node_fs node_fs_buf;
+  struct node_item* node;
+  int i;
+  byte dir_sekarang;
+
+  readSector(&(node_fs_buf.nodes[0]), FS_NODE_SECTOR_NUMBER);
+  readSector(&(node_fs_buf.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
+
+  //masukkan direktori sekarang (cwd) ke variabel dir_sekarang
+  dir_sekarang = cwd;
+
+  if (dirname != 0 && dirname[0] != '\0' && strcmp(dirname, ".") != true) {
+    //Secara iteratif, cari kalok ada direktori yang namanya sesuai dirname (di argument/syntax ls)
+    for (i = 0; i < FS_MAX_NODE; i++) {
+      node = &node_fs_buf.nodes[i];
+      if (node->parent_index == cwd && strncmp(node->node_name, dirname, MAX_FILENAME) == true) {
+        dir_sekarang = i;
+        break;
+      }
+    }
+
+    //kalok udah sampe iterasi terakhir (FS_MAX_NODE, soalnya loopnya cuma sampe FS_MAX_NODE - 1) jadi ga ada yg sama
+    if (i == FS_MAX_NODE) {
+      printString("ls: direktoriny hoax, g ada bang\n");
+      return;
+    }
+  }
+
+  //secara iteratif (lagi) cari node yang parentnya itu "dir_sekarang" trus print isi file/direktori yg ada
+  for (i = 0; i < FS_MAX_NODE; i++) {
+    node = &node_fs_buf.nodes[i];
+
+    if (node->parent_index == dir_sekarang && node->node_name[0] != '\0') {
+      printString(node->node_name);
+      if (node->data_index == FS_NODE_D_DIR) printString("/");
+      printString("\n");
+    }
+  }
+}
 
 // TODO: 8. Implement mv function
 void mv(byte cwd, char* src, char* dst) {}
