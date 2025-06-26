@@ -35,7 +35,37 @@ void printCWD(byte cwd) {}
 void parseCommand(char* buf, char* cmd, char arg[2][64]) {}
 
 // TODO: 6. Implement cd function
-void cd(byte* cwd, char* dirname) {}
+void cd(byte* cwd, char* dirname) {
+  struct node_fs node_fs_buf;
+  int i;
+  readSector(&(node_fs_buf.nodes[0]), FS_NODE_SECTOR_NUMBER);        
+  readSector(&(node_fs_buf.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
+  
+
+  //kalok syntax "/" = ke root 
+  if (strcmp(dirname, "/") == true) {
+    *cwd = FS_NODE_P_ROOT;
+    return;
+  }
+
+  //kalok syntax ".." dan bukan lagi di root = ke parent index
+  if (strcmp(dirname, "..") == true) {
+    if (*cwd != FS_NODE_P_ROOT) {
+      *cwd = node_fs_buf.nodes[*cwd].parent_index;
+    }
+    return;
+  }
+  
+  //buat cd (directory), nge-search secara iteratif ke directorynya, terus pindah directory ke situ
+  for (i = 0; i < FS_MAX_NODE; i++) {
+    struct node_item* node = &node_fs_buf.nodes[i];
+
+    if (node->parent_index == *cwd && node->data_index == FS_NODE_D_DIR && strncmp(node->node_name, dirname, MAX_FILENAME) == true) {
+      *cwd = i; 
+      return;
+    }
+  }
+}
 
 // TODO: 7. Implement ls function
 void ls(byte cwd, char* dirname) {}
