@@ -77,7 +77,12 @@ void mv(byte cwd, char* src, char* dst) {}
 void cp(byte cwd, char* src, char* dst) {}
 
 // TODO: 10. Implement cat function
-void cat(byte cwd, char* filename) {}
+void cat(byte cwd, char* filename) {
+  struct node_fs node_fs_buf;
+  int i;
+  readSector(&(node_fs_buf.nodes[0]), FS_NODE_SECTOR_NUMBER);        
+  readSector(&(node_fs_buf.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
+}
 
 // TODO: 11. Implement mkdir function
 void mkdir(byte cwd, char* dirname) {}
