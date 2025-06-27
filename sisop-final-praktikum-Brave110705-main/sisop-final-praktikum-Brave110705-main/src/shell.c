@@ -132,16 +132,102 @@ void cd(byte* cwd, char* dirname) {
 }
 
 
-// TODO: 7. Implement ls function
-void ls(byte * cwd, char* dirname) {
-  // kalau nutut mau tak tambahin warna weheheh
-  struct node_fs node_fs_buf;
-  struct node_item node_now;
-  int i;
-  readSector(&(node_fs_buf.nodes[0]), FS_NODE_SECTOR_NUMBER);        
-  readSector(&(node_fs_buf.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
+// // TODO: 7. Implement ls function
+// void ls(byte * cwd, char* dirname) {
+//   // kalau nutut mau tak tambahin warna weheheh
+//   struct node_fs node_fs_buf;
+//   struct node_item node_now;
+//   int i;
+//   readSector(&(node_fs_buf.nodes[0]), FS_NODE_SECTOR_NUMBER);        
+//   readSector(&(node_fs_buf.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
   
 
+//   // if only "ls" without dirname
+//   if (strcmp(dirname, "") == true) {
+//       for (i = 0; i < FS_MAX_NODE;i++) {
+//         node_now = node_fs_buf.nodes[i];
+
+//         if (node_now.parent_index == cwd && !strcmp(node_now.node_name,"")) {
+//           printString((node_now.data_index == FS_NODE_D_DIR) ? "d  " : "-  ");
+
+//           printString(node_now.node_name);
+//           printString("\n");
+
+//         }
+//       }
+//     return;
+//   }
+
+//   if (strcmp(dirname, "/") == true) {
+//       for (i = 0; i < FS_MAX_NODE;i++) {
+//         node_now = node_fs_buf.nodes[i];
+
+//         if (node_now.parent_index == 0xFF && !strcmp(node_now.node_name,"")) {
+//           printString((node_now.data_index == FS_NODE_D_DIR) ? "d  " : "-  ");
+
+//           printString(node_now.node_name);
+//           printString("\n");
+
+//         }
+//       }
+//     return;
+//   }
+
+//   //kalok syntax ".." dan bukan lagi di root = ke parent index
+//   if (strcmp(dirname, "..") == true) {
+//     if (cwd != FS_NODE_P_ROOT) {
+//       for (i = 0; i < FS_MAX_NODE;i++) {
+//         node_now = node_fs_buf.nodes[i];
+
+//         if (node_now.parent_index == node_fs_buf.nodes[*cwd].parent_index && !strcmp(node_now.node_name,"")) {
+//           printString((node_now.data_index == FS_NODE_D_DIR) ? "d  " : "-  ");
+
+//           printString(node_now.node_name);
+//           printString("\n");
+
+//         }
+//       }
+//     }
+//     return;
+//   }
+
+
+//   // if dirname is present
+//   for (i = 0; i < FS_MAX_NODE; i++) {
+//     struct node_item* node = &node_fs_buf.nodes[i];
+
+//     if (strcmp(node->node_name,dirname)) {
+//       for (i = 0; i < FS_MAX_NODE;i++) {
+
+//         if (node_fs_buf.nodes[i].parent_index == node->parent_index) {
+//           printString((node_now.data_index == FS_NODE_D_DIR) ? "d  " : "-  ");
+
+//           printString(node_fs_buf.nodes[i].node_name);
+//           printString("\n");
+//         }
+//       }
+//       return;
+//     }
+
+    
+//   }
+
+//   return;
+// }
+
+
+// TODO: 7. Implement ls function
+void ls(byte cwd, char* dirname) {
+  struct node_fs node_fs_buf;
+  struct node_item* node;
+  struct node_item node_now;
+  int i;
+  byte dir_sekarang;
+
+  readSector(&(node_fs_buf.nodes[0]), FS_NODE_SECTOR_NUMBER);
+  readSector(&(node_fs_buf.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
+
+  
   // if only "ls" without dirname
   if (strcmp(dirname, "") == true) {
       for (i = 0; i < FS_MAX_NODE;i++) {
@@ -151,6 +237,8 @@ void ls(byte * cwd, char* dirname) {
           printString((node_now.data_index == FS_NODE_D_DIR) ? "d  " : "-  ");
 
           printString(node_now.node_name);
+          if (node_now.data_index == FS_NODE_D_DIR) printString("/");
+
           printString("\n");
 
         }
@@ -166,6 +254,8 @@ void ls(byte * cwd, char* dirname) {
           printString((node_now.data_index == FS_NODE_D_DIR) ? "d  " : "-  ");
 
           printString(node_now.node_name);
+          if (node_now.data_index == FS_NODE_D_DIR) printString("/");
+
           printString("\n");
 
         }
@@ -179,10 +269,11 @@ void ls(byte * cwd, char* dirname) {
       for (i = 0; i < FS_MAX_NODE;i++) {
         node_now = node_fs_buf.nodes[i];
 
-        if (node_now.parent_index == node_fs_buf.nodes[*cwd].parent_index && !strcmp(node_now.node_name,"")) {
+        if (node_now.parent_index == node_fs_buf.nodes[cwd].parent_index && !strcmp(node_now.node_name,"")) {
           printString((node_now.data_index == FS_NODE_D_DIR) ? "d  " : "-  ");
 
           printString(node_now.node_name);
+          if (node_now.data_index == FS_NODE_D_DIR) printString("/");
           printString("\n");
 
         }
@@ -190,41 +281,6 @@ void ls(byte * cwd, char* dirname) {
     }
     return;
   }
-
-
-  // if dirname is present
-  for (i = 0; i < FS_MAX_NODE; i++) {
-    struct node_item* node = &node_fs_buf.nodes[i];
-
-    if (strcmp(node->node_name,dirname)) {
-      for (i = 0; i < FS_MAX_NODE;i++) {
-
-        if (node_fs_buf.nodes[i].parent_index == node->parent_index) {
-          printString((node_now.data_index == FS_NODE_D_DIR) ? "d  " : "-  ");
-
-          printString(node_fs_buf.nodes[i].node_name);
-          printString("\n");
-        }
-      }
-      return;
-    }
-
-    
-  }
-
-  return;
-}
-
-
-// TODO: 7. Implement ls function
-void ls(byte cwd, char* dirname) {
-  struct node_fs node_fs_buf;
-  struct node_item* node;
-  int i;
-  byte dir_sekarang;
-
-  readSector(&(node_fs_buf.nodes[0]), FS_NODE_SECTOR_NUMBER);
-  readSector(&(node_fs_buf.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
 
   //masukkan direktori sekarang (cwd) ke variabel dir_sekarang
   dir_sekarang = cwd;
@@ -251,6 +307,7 @@ void ls(byte cwd, char* dirname) {
     node = &node_fs_buf.nodes[i];
 
     if (node->parent_index == dir_sekarang && node->node_name[0] != '\0') {
+      printString((node_now.data_index == FS_NODE_D_DIR) ? "d  " : "-  ");
       printString(node->node_name);
       if (node->data_index == FS_NODE_D_DIR) printString("/");
       printString("\n");
