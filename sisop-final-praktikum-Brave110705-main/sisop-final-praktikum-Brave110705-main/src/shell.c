@@ -132,86 +132,45 @@ void cd(byte* cwd, char* dirname) {
 }
 
 // TODO: 7. Implement ls function
-void ls(byte * cwd, char* dirname) {
-  // kalau nutut mau tak tambahin warna weheheh
+void ls(byte cwd, char* dirname) {
   struct node_fs node_fs_buf;
-  struct node_item node_now;
+  struct node_item* node;
   int i;
-  readSector(&(node_fs_buf.nodes[0]), FS_NODE_SECTOR_NUMBER);        
+  byte dir_sekarang;
+
+  readSector(&(node_fs_buf.nodes[0]), FS_NODE_SECTOR_NUMBER);
   readSector(&(node_fs_buf.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
-  
 
-  // if only "ls" without dirname
-  if (strcmp(dirname, "") == true) {
-      for (i = 0; i < FS_MAX_NODE;i++) {
-        node_now = node_fs_buf.nodes[i];
+  //masukkan direktori sekarang (cwd) ke variabel dir_sekarang
+  dir_sekarang = cwd;
 
-        if (node_now.parent_index == cwd && !strcmp(node_now.node_name,"")) {
-          printString((node_now.data_index == FS_NODE_D_DIR) ? "d  " : "-  ");
-
-          printString(node_now.node_name);
-          printString("\n");
-
-        }
-      }
-    return;
-  }
-
-  if (strcmp(dirname, "/") == true) {
-      for (i = 0; i < FS_MAX_NODE;i++) {
-        node_now = node_fs_buf.nodes[i];
-
-        if (node_now.parent_index == 0xFF && !strcmp(node_now.node_name,"")) {
-          printString((node_now.data_index == FS_NODE_D_DIR) ? "d  " : "-  ");
-
-          printString(node_now.node_name);
-          printString("\n");
-
-        }
-      }
-    return;
-  }
-
-  //kalok syntax ".." dan bukan lagi di root = ke parent index
-  if (strcmp(dirname, "..") == true) {
-    if (cwd != FS_NODE_P_ROOT) {
-      for (i = 0; i < FS_MAX_NODE;i++) {
-        node_now = node_fs_buf.nodes[i];
-
-        if (node_now.parent_index == node_fs_buf.nodes[*cwd].parent_index && !strcmp(node_now.node_name,"")) {
-          printString((node_now.data_index == FS_NODE_D_DIR) ? "d  " : "-  ");
-
-          printString(node_now.node_name);
-          printString("\n");
-
-        }
+  if (dirname != 0 && dirname[0] != '\0' && strcmp(dirname, ".") != true) {
+    //Secara iteratif, cari kalok ada direktori yang namanya sesuai dirname (di argument/syntax ls)
+    for (i = 0; i < FS_MAX_NODE; i++) {
+      node = &node_fs_buf.nodes[i];
+      if (node->parent_index == cwd && strncmp(node->node_name, dirname, MAX_FILENAME) == true) {
+        dir_sekarang = i;
+        break;
       }
     }
-    return;
-  }
 
-
-  // if dirname is present
-  for (i = 0; i < FS_MAX_NODE; i++) {
-    struct node_item* node = &node_fs_buf.nodes[i];
-
-    if (strcmp(node->node_name,dirname)) {
-      for (i = 0; i < FS_MAX_NODE;i++) {
-
-        if (node_fs_buf.nodes[i].parent_index == node->parent_index) {
-          printString((node_now.data_index == FS_NODE_D_DIR) ? "d  " : "-  ");
-
-          printString(node_fs_buf.nodes[i].node_name);
-          printString("\n");
-        }
-      }
+    //kalok udah sampe iterasi terakhir (FS_MAX_NODE, soalnya loopnya cuma sampe FS_MAX_NODE - 1) jadi ga ada yg sama
+    if (i == FS_MAX_NODE) {
+      printString("ls: direktoriny hoax, g ada bang\n");
       return;
     }
-
-    
   }
 
-  return;
+  //secara iteratif (lagi) cari node yang parentnya itu "dir_sekarang" trus print isi file/direktori yg ada
+  for (i = 0; i < FS_MAX_NODE; i++) {
+    node = &node_fs_buf.nodes[i];
+
+    if (node->parent_index == dir_sekarang && node->node_name[0] != '\0') {
+      printString(node->node_name);
+      if (node->data_index == FS_NODE_D_DIR) printString("/");
+      printString("\n");
+    }
+  }
 }
 
 // TODO: 8. Implement mv function
