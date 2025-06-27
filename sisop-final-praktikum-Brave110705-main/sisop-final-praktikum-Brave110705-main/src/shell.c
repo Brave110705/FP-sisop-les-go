@@ -328,14 +328,14 @@ void cat(byte cwd, char* filename) {
   struct file_metadata fmd;
   enum fs_return retVal;      
   int it;
+  byte buffer[512];
 
   strcpy(fmd.node_name,filename);
-  fmd.parent_index = 0xFF;
+  fmd.parent_index = cwd;
 
   fsRead(&fmd,&retVal);
 
   if (retVal == FS_SUCCESS) {
-
     printString("this is the file you wanted\n\n");
     printString(fmd.buffer);
     return;
