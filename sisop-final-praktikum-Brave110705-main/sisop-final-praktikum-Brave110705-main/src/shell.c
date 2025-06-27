@@ -43,7 +43,6 @@ void shell() {
     else if (strcmp(cmd, "cat")) cat(cwd, arg[0]);
     else if (strcmp(cmd, "mkdir")) mkdir(cwd, arg[0]);
     else if (strcmp(cmd, "clear")) clearScreen();
-    else if (strcmp(cmd, "exit") || strcmp(cmd, "end")) {eexit(); break;}
     else printString("Invalid command\n");
   }
 }
@@ -528,20 +527,20 @@ void mkdir(byte cwd, char* dirname) {
 
 
 
-void eexit() {
-  printString("credit:");
-  sleep(2);
-  printString("5025241xxx: Brave Juliada\n\n");
-  sleep(2);
-  printString("5025241xxx: Ananda Aryasatya Z A\n\n");
-  sleep(2);
-  printString("5025241xxx: Hosea Felix S\n\n");
+// void eexit() {
+//   printString("credit:");
+//   sleep(2);
+//   printString("5025241xxx: Brave Juliada\n\n");
+//   sleep(2);
+//   printString("5025241xxx: Ananda Aryasatya Z A\n\n");
+//   sleep(2);
+//   printString("5025241xxx: Hosea Felix S\n\n");
 
 
 
   
   
-}
+// }
 
 /* 0x100. Node akan disimpan sebanyak 2 sektor pada sektor 0x101 dan 0x102. 
 Data akan disimpan sebanyak 1 sektor pada sektor 0x103.*/
