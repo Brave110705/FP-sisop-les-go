@@ -444,19 +444,20 @@ void cp(byte cwd, char* src, char* dst) {
     struct data_fs data_fs_buf;
     struct node_item now_node;
     struct file_metadata src_md;
-    enum fs_return status;
     int i;
+    int j;
     byte dst_idx;
-    char *dst_fname;
+    char *dst_fname, *dst_dir;
     int empty_node, empty_data;
     int sectors, written;
-
+    enum fs_return status;
 
     readSector(&map_fs_buf, FS_MAP_SECTOR_NUMBER);
     readSector(&(node_fs_buf.nodes[0]), FS_NODE_SECTOR_NUMBER);
     readSector(&(node_fs_buf.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
     readSector(&data_fs_buf, FS_DATA_SECTOR_NUMBER);
 
+    // untuk cari src
     for (i = 0; i < FS_MAX_NODE; i++) {
         if (strcmp(node_fs_buf.nodes[i].node_name, src) &&
             node_fs_buf.nodes[i].parent_index == cwd) {
@@ -468,7 +469,6 @@ void cp(byte cwd, char* src, char* dst) {
         printString("cp: source not found\n");
         return;
     }
-    
     if (now_node.data_index == FS_NODE_D_DIR) {
         printString("cp: cannot copy a directory\n");
         return;
@@ -482,8 +482,40 @@ void cp(byte cwd, char* src, char* dst) {
         return;
     }
 
-    dst_idx   = cwd;
+    dst_idx = cwd; 
     dst_fname = dst;
+
+    if (dst[0] == '/' && dst[1] != '\0') {
+        dst_idx   = FS_NODE_P_ROOT;
+        dst_fname = dst + 1;
+    }
+    else if (dst[0] == '.' && dst[1] == '.' && dst[2] == '/') {
+        dst_idx   = node_fs_buf.nodes[cwd].parent_index;
+        dst_fname = dst + 3;
+    }
+
+    else {
+        for (i = 0; dst[i] != '\0'; i++) {
+            if (dst[i] == '/') {
+                dst[i]   = '\0';  
+                dst_dir   = dst;
+                dst_fname = dst + i + 1;
+                for (j = 0; j < FS_MAX_NODE; j++) {
+                    if (strcmp(node_fs_buf.nodes[j].node_name, dst_dir) &&
+                        node_fs_buf.nodes[j].parent_index == cwd &&
+                        node_fs_buf.nodes[j].data_index == FS_NODE_D_DIR) {
+                        dst_idx = j;
+                        break;
+                    }
+                }
+                if (dst_idx == cwd) {
+                    printString("cp: target dir not found\n");
+                    return;
+                }
+                break;
+            }
+        }
+    }
 
     for (empty_node = 0; empty_node < FS_MAX_NODE; empty_node++) {
         if (node_fs_buf.nodes[empty_node].node_name[0] == '\0') break;
@@ -492,7 +524,6 @@ void cp(byte cwd, char* src, char* dst) {
         printString("cp: no free node\n");
         return;
     }
-
     for (empty_data = 0; empty_data < FS_MAX_DATA; empty_data++) {
         if (data_fs_buf.datas[empty_data].sectors[0] == 0x00) break;
     }
@@ -503,7 +534,7 @@ void cp(byte cwd, char* src, char* dst) {
 
     strcpy(node_fs_buf.nodes[empty_node].node_name, dst_fname);
     node_fs_buf.nodes[empty_node].parent_index = dst_idx;
-    node_fs_buf.nodes[empty_node].data_index    = (byte)empty_data;
+    node_fs_buf.nodes[empty_node].data_index = (byte)empty_data;
 
     sectors = (src_md.filesize + SECTOR_SIZE - 1) / SECTOR_SIZE;
     written = 0;
@@ -516,12 +547,14 @@ void cp(byte cwd, char* src, char* dst) {
         }
     }
 
+    writeSector(&map_fs_buf,             FS_MAP_SECTOR_NUMBER);
+    writeSector(node_fs_buf.nodes,       FS_NODE_SECTOR_NUMBER);
+    writeSector(node_fs_buf.nodes + 32,  FS_NODE_SECTOR_NUMBER + 1);
+    writeSector(&data_fs_buf,            FS_DATA_SECTOR_NUMBER);
 
-    writeSector(&map_fs_buf, FS_MAP_SECTOR_NUMBER);
-    writeSector(&(node_fs_buf.nodes[0]), FS_NODE_SECTOR_NUMBER);
-    writeSector(&(node_fs_buf.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
-    writeSector(&data_fs_buf, FS_DATA_SECTOR_NUMBER);
-    printString("cp: done\n");
+  printString("cp: ");
+  printString(src);
+  printString("\n");
 }
 
 
