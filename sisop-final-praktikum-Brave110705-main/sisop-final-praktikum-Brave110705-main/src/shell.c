@@ -316,7 +316,24 @@ void ls(byte cwd, char* dirname) {
 }
 
 // TODO: 8. Implement mv function
-void mv(byte cwd, char* src, char* dst) {}
+void mv(byte cwd, char* src, char* dst) {
+  struct node_fs node_fs_buf;
+  struct node_item now_node;
+  int i;
+  readSector(&(node_fs_buf.nodes[0]), FS_NODE_SECTOR_NUMBER);        
+  readSector(&(node_fs_buf.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
+
+  // finding dest
+  if (strncmp)
+  for (i = 0; i < 64; i++) {
+    now_node = node_fs_buf.nodes[i];
+    if (strcmp(now_node.node_name,src)) {
+
+      break;
+    }
+  }
+
+}
  
 // TODO: 9. Implement cp function
 void cp(byte cwd, char* src, char* dst) {}
