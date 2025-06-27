@@ -49,17 +49,17 @@ void shell() {
 
 // TODO: 4. Implement printCWD function
 void printCWD(byte cwd) {
-    struct node_fs fs;
+    struct node_fs node_fs_buf;
     char* names[FS_MAX_NODE];
     int depth = 0;
     int i;
 
-    readSector(fs.nodes, FS_NODE_SECTOR_NUMBER);
-    readSector(fs.nodes + 32, FS_NODE_SECTOR_NUMBER + 1);
+  readSector(&(node_fs_buf.nodes[0]), FS_NODE_SECTOR_NUMBER);        
+  readSector(&(node_fs_buf.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
 
     while (cwd != FS_NODE_P_ROOT && depth < FS_MAX_NODE) {
-        names[depth++] = fs.nodes[cwd].node_name;
-        cwd = fs.nodes[cwd].parent_index;
+        names[depth++] = node_fs_buf.nodes[cwd].node_name;
+        cwd = node_fs_buf.nodes[cwd].parent_index;
     }
 
     if (depth == 0) {
