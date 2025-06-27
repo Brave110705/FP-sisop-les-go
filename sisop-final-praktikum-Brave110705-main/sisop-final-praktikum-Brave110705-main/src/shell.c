@@ -329,6 +329,8 @@ void mv(byte cwd, char* src, char* dst) {
     dest_idx = 0;
   } else if (strncmp(dst,"..",2)) {
     dest_idx = node_fs_buf.nodes[cwd].parent_index;
+  } else {
+    
   }
   for (i = 0; i < 64; i++) {
     now_node = node_fs_buf.nodes[i];
