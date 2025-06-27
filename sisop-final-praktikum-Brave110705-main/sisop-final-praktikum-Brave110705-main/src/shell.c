@@ -438,7 +438,92 @@ void mv(byte cwd, char* src, char* dst) {
 }
  
 // TODO: 9. Implement cp function
-void cp(byte cwd, char* src, char* dst) {}
+void cp(byte cwd, char* src, char* dst) {
+    struct map_fs map_fs_buf;
+    struct node_fs node_fs_buf;
+    struct data_fs data_fs_buf;
+    struct node_item now_node;
+    struct file_metadata src_md;
+    enum fs_return status;
+    int i;
+    byte dst_idx;
+    char *dst_fname;
+    int empty_node, empty_data;
+    int sectors, written;
+
+
+    readSector(&map_fs_buf, FS_MAP_SECTOR_NUMBER);
+    readSector(&(node_fs_buf.nodes[0]), FS_NODE_SECTOR_NUMBER);
+    readSector(&(node_fs_buf.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
+    readSector(&data_fs_buf, FS_DATA_SECTOR_NUMBER);
+
+    for (i = 0; i < FS_MAX_NODE; i++) {
+        if (strcmp(node_fs_buf.nodes[i].node_name, src) &&
+            node_fs_buf.nodes[i].parent_index == cwd) {
+            now_node = node_fs_buf.nodes[i];
+            break;
+        }
+    }
+    if (i == FS_MAX_NODE) {
+        printString("cp: source not found\n");
+        return;
+    }
+    
+    if (now_node.data_index == FS_NODE_D_DIR) {
+        printString("cp: cannot copy a directory\n");
+        return;
+    }
+
+    src_md.parent_index = cwd;
+    strcpy(src_md.node_name, src);
+    fsRead(&src_md, &status);
+    if (status != FS_SUCCESS) {
+        printString("cp: read error\n");
+        return;
+    }
+
+    dst_idx   = cwd;
+    dst_fname = dst;
+
+    for (empty_node = 0; empty_node < FS_MAX_NODE; empty_node++) {
+        if (node_fs_buf.nodes[empty_node].node_name[0] == '\0') break;
+    }
+    if (empty_node == FS_MAX_NODE) {
+        printString("cp: no free node\n");
+        return;
+    }
+
+    for (empty_data = 0; empty_data < FS_MAX_DATA; empty_data++) {
+        if (data_fs_buf.datas[empty_data].sectors[0] == 0x00) break;
+    }
+    if (empty_data == FS_MAX_DATA) {
+        printString("cp: no free data\n");
+        return;
+    }
+
+    strcpy(node_fs_buf.nodes[empty_node].node_name, dst_fname);
+    node_fs_buf.nodes[empty_node].parent_index = dst_idx;
+    node_fs_buf.nodes[empty_node].data_index    = (byte)empty_data;
+
+    sectors = (src_md.filesize + SECTOR_SIZE - 1) / SECTOR_SIZE;
+    written = 0;
+    for (i = 16; i < SECTOR_SIZE && written < sectors; i++) {
+        if (!map_fs_buf.is_used[i]) {
+            map_fs_buf.is_used[i] = true;
+            data_fs_buf.datas[empty_data].sectors[written] = (byte)i;
+            writeSector(src_md.buffer + written * SECTOR_SIZE, i);
+            written++;
+        }
+    }
+
+
+    writeSector(&map_fs_buf, FS_MAP_SECTOR_NUMBER);
+    writeSector(&(node_fs_buf.nodes[0]), FS_NODE_SECTOR_NUMBER);
+    writeSector(&(node_fs_buf.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
+    writeSector(&data_fs_buf, FS_DATA_SECTOR_NUMBER);
+    printString("cp: done\n");
+}
+
 
 // TODO: 10. Implement cat functionW
 void cat(byte cwd, char* filename) {
