@@ -320,11 +320,16 @@ void mv(byte cwd, char* src, char* dst) {
   struct node_fs node_fs_buf;
   struct node_item now_node;
   int i;
+  int dest_idx;
   readSector(&(node_fs_buf.nodes[0]), FS_NODE_SECTOR_NUMBER);        
   readSector(&(node_fs_buf.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
 
   // finding dest
-  if (strncmp)
+  if (strncmp(dst,"/",1)) {
+    dest_idx = 0;
+  } else if (strncmp(dst,"..",2)) {
+    dest_idx = node_fs_buf.nodes[cwd].parent_index;
+  }
   for (i = 0; i < 64; i++) {
     now_node = node_fs_buf.nodes[i];
     if (strcmp(now_node.node_name,src)) {

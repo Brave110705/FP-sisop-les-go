@@ -60,6 +60,18 @@ bool strncmp(char* str1, char* str2, int n) {
   return true;
 }
 
+char * strcmpuch(char * str1, char * str2, char delimiters) {
+  unsigned int i;
+
+  i = 0;
+  while (str1[i] != '\0' && str2[i] != '\0') {
+    if (str1[i] != str2[i]) return false;
+    i++;
+  }
+  return true;
+
+}
+
 void memset(byte* dst, byte tgt, unsigned int size) {
   unsigned int i;
   for (i = 0; i < size; i++) dst[i] = tgt;
