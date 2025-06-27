@@ -18,6 +18,8 @@ void memset(byte* dst, byte tgt, unsigned int size);
 
 bool strncmp(char* str1, char* str2, int n);
 void memset(byte* dst, byte tgt, unsigned int size);
+char * strchchr(char * str1, char delim);
+void sleep(unsigned int time);
 
 
 /**

@@ -13,5 +13,6 @@ void mv(byte cwd, char* src, char* dst);
 void cp(byte cwd, char* src, char* dst);
 void cat(byte cwd, char* filename);
 void mkdir(byte cwd, char* dirname);
+void eexit();
 
 #endif // __SHELL_H__

@@ -10,21 +10,31 @@ void shell() {
 
   byte cwd = FS_NODE_P_ROOT;
 
+  printString("        ____ ___   \n");
+  printString("  _____/ __ <  /  \n");
+  printString(" / ___/ / / / /  \n");
+  printString("/ /__/ /_/ / /   \n");
+  printString("\\___/\\____/_/      \n");
+  printString("\n");
+  printString("Final Project SISOP 2025:\n\n");
+
   
   while (true) {
+
+
     printString("MengOS:");
     printCWD(cwd);
     printString("$ ");
     readString(buf);
     parseCommand(buf, cmd, arg);
-    printString(cmd);
-    printString("\n");
+    // printString(cmd);
+    // printString("\n");
 
-    printString(arg[0]);
-    printString("\n");
+    // printString(arg[0]);
+    // printString("\n");
     
-    printString(arg[1]);
-    printString("\n");
+    // printString(arg[1]);
+    // printString("\n");
 
     if (strcmp(cmd, "cd")) cd(&cwd, arg[0]);
     else if (strcmp(cmd, "ls")) ls(cwd, arg[0]);
@@ -33,6 +43,7 @@ void shell() {
     else if (strcmp(cmd, "cat")) cat(cwd, arg[0]);
     else if (strcmp(cmd, "mkdir")) mkdir(cwd, arg[0]);
     else if (strcmp(cmd, "clear")) clearScreen();
+    else if (strcmp(cmd, "exit") || strcmp(cmd, "end")) {eexit(); break;}
     else printString("Invalid command\n");
   }
 }
@@ -129,6 +140,7 @@ void cd(byte* cwd, char* dirname) {
       return;
     }
   }
+  printString("cd: directory not found\n");
 }
 
 
@@ -319,26 +331,110 @@ void ls(byte cwd, char* dirname) {
 void mv(byte cwd, char* src, char* dst) {
   struct node_fs node_fs_buf;
   struct node_item now_node;
+  char * dst_dir;
+  char * dst_fname;
   int i;
-  int dest_idx;
+  int dst_idx;
   readSector(&(node_fs_buf.nodes[0]), FS_NODE_SECTOR_NUMBER);        
   readSector(&(node_fs_buf.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
 
-  // finding dest
-  if (strncmp(dst,"/",1)) {
-    dest_idx = 0;
-  } else if (strncmp(dst,"..",2)) {
-    dest_idx = node_fs_buf.nodes[cwd].parent_index;
-  } else {
-    
+  if (strcmp(dst,"")) {
+    printString("mv: destination is not specified\n");
+    return;
+  } else if (strcmp(cwd,"")) {
+    printString("mv: no source provided\n");
+    return;
   }
+
+  // finding dest
+  if (strcmp(dst,"/")) {
+    // printString("akaraka (noname)\n");
+    dst_idx = FS_NODE_P_ROOT;
+    dst_fname = src;
+
+  } else if (strcmp(dst,"..")) {
+
+    dst_idx = node_fs_buf.nodes[cwd].parent_index;
+    dst_fname = src;
+
+  } else if (strncmp(dst,"/",1)) {
+    // /out_name
+    // printString("akaraka\n");
+
+    dst_idx = FS_NODE_P_ROOT;
+    dst_fname = dst+1;
+
+  } else if (strncmp(dst,"..",2)) {
+    // ../out_name
+    // printString(".........\n");
+    dst_idx = node_fs_buf.nodes[cwd].parent_index;
+    dst_fname = dst+3;
+  } else {
+    char * slash = strchchr(dst,'/');
+    if (slash == 0) {
+      // printString("same dir (rename)\n");
+      dst_idx = cwd;
+      dst_fname = dst;
+    } else {
+      // printString("a/b\n");
+      // printString("\n");
+      // printString(slash);
+
+      // printString("\n");
+
+      *slash = '\0';
+
+      dst_dir = dst;
+      dst_fname = slash+1;
+
+      if (strcmp(dst_fname,"")) {
+        dst_fname = src;
+      }
+
+      // printString("dest: \n");
+      // printString(dst_dir);
+      // printString("\n");
+      // printString("fname: \n");
+      // printString(dst_fname);
+      // printString("\n");
+
+
+
+      for (i = 0; i < 64; i++) {
+        if (node_fs_buf.nodes[i].node_name != "") {
+          if (strcmp(node_fs_buf.nodes[i].node_name, dst_dir)) {
+            // printString("dir found \n\n");
+            dst_idx = i;
+            break;
+          }
+        }
+      }
+
+      printString("mv: target ");
+      printString(dst_dir);
+      printString(" not found\n");
+      return;
+    }
+  }
+
   for (i = 0; i < 64; i++) {
     now_node = node_fs_buf.nodes[i];
     if (strcmp(now_node.node_name,src)) {
 
-      break;
+      strcpy(node_fs_buf.nodes[i].node_name, dst_fname);
+      node_fs_buf.nodes[i].parent_index = dst_idx;
+
+      writeSector(&(node_fs_buf.nodes[0]),FS_NODE_SECTOR_NUMBER);
+      writeSector(&(node_fs_buf.nodes[32]),FS_NODE_SECTOR_NUMBER+1);
+
+      return;
     }
   }
+
+  printString("mv: ");
+  printString(src);
+
+  printString(" not found\n");
 
 }
  
@@ -359,11 +455,16 @@ void cat(byte cwd, char* filename) {
   fsRead(&fmd,&retVal);
 
   if (retVal == FS_SUCCESS) {
-    printString("this is the file you wanted\n\n");
+    // printString("this is the file you wanted\n\n");
     printString(fmd.buffer);
+    printString("\n");
     return;
+  } else if (retVal == FS_R_TYPE_IS_DIRECTORY) {
+    printString("cat: ");
+    printString(filename);
+    printString(" is a directory\n");
   } else {
-    printString("nf\n");
+    printString("cat: file not found\n");
   }
 
 
@@ -423,6 +524,23 @@ void mkdir(byte cwd, char* dirname) {
     }
   }
 
+}
+
+
+
+void eexit() {
+  printString("credit:");
+  sleep(2);
+  printString("5025241xxx: Brave Juliada\n\n");
+  sleep(2);
+  printString("5025241xxx: Ananda Aryasatya Z A\n\n");
+  sleep(2);
+  printString("5025241xxx: Hosea Felix S\n\n");
+
+
+
+  
+  
 }
 
 /* 0x100. Node akan disimpan sebanyak 2 sektor pada sektor 0x101 dan 0x102. 

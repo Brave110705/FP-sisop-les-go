@@ -72,7 +72,28 @@ char * strcmpuch(char * str1, char * str2, char delimiters) {
 
 }
 
+char * strchchr(char * str1, char delim) {
+  unsigned int i;
+
+  i = 0;
+  while (str1[i] != '\0') {
+    if (str1[i] == delim) return &(str1[i]);
+    i++;
+  }
+  return 0;
+
+}
+
 void memset(byte* dst, byte tgt, unsigned int size) {
   unsigned int i;
   for (i = 0; i < size; i++) dst[i] = tgt;
+}
+
+void sleep(unsigned int time) {
+  int i,j;
+  int adjusted_count = 2* time * 100 * 10000;
+  for (i = 0; i < adjusted_count ; i++) {
+    asm("nop");
+  }
+  return ;
 }
