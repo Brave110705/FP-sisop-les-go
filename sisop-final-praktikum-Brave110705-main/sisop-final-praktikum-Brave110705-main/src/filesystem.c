@@ -25,14 +25,14 @@ void fsRead(struct file_metadata* metadata, enum fs_return* status) {
 
 
   readSector(&(node_fs_buf.nodes[0]), FS_NODE_SECTOR_NUMBER);        
-  readSector(&(node_fs_buf.nodes[32]), FS_NODE_SECTOR_NUMBER);   
+  readSector(&(node_fs_buf.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);   
   readSector(&data_fs_buf, FS_DATA_SECTOR_NUMBER);                   
 
   //sesuai soal, cari secara iteratif "mencari node yang memiliki nama yang sesuai dengan metadata->node_name dan parent index sesuai dengan metadata->parent_index"
   for (i = 0; i < FS_MAX_NODE; i++) {
     struct node_item* node = &node_fs_buf.nodes[i];
     if (node->parent_index == metadata->parent_index &&
-        strncmp(node->node_name, metadata->node_name, MAX_FILENAME) == 0) {
+        strncmp(node->node_name, metadata->node_name, MAX_FILENAME) == true) {
       ada = 1;
       node_index = i;
       break;
