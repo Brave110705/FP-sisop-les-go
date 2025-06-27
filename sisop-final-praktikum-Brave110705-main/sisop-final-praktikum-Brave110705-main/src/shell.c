@@ -328,7 +328,6 @@ void cat(byte cwd, char* filename) {
   struct file_metadata fmd;
   enum fs_return retVal;      
   int it;
-  byte buffer[512];
 
   strcpy(fmd.node_name,filename);
   fmd.parent_index = cwd;
