@@ -19,10 +19,6 @@ void memcpy(byte* dst, byte* src, unsigned int size) {
   for (i = 0; i < size; i++) dst[i] = src[i];
 }
 
-void memset(byte* dst, byte tgt, unsigned int size) {
-  unsigned int i;
-  for (i = 0; i < size; i++) dst[i] = tgt;
-}
 
 unsigned int strlen(char* str) {
   unsigned int len = 0;
@@ -33,16 +29,6 @@ unsigned int strlen(char* str) {
 bool strcmp(char* str1, char* str2) {
   unsigned int i = 0;
   while (str1[i] != '\0' && str2[i] != '\0') {
-    if (str1[i] != str2[i]) return false;
-    i++;
-  }
-  return str1[i] == str2[i];
-}
-
-bool strncmp(char* str1,char* str2, int n) {
-  unsigned int i;
-  // for (i = 0; i < n;i++) {
-  while (str1[i] != '\0' && str2[i] != '\0' && i < n) {
     if (str1[i] != str2[i]) return false;
     i++;
   }
@@ -65,15 +51,16 @@ void clear(byte* buf, unsigned int size) {
 
 bool strncmp(char* str1, char* str2, int n) {
   unsigned int i;
+
+  i = 0;
   while (str1[i] != '\0' && str2[i] != '\0' && i < n) {
     if (str1[i] != str2[i]) return false;
     i++;
   }
-  return str1[i] == str2[i];
+  return true;
 }
 
 void memset(byte* dst, byte tgt, unsigned int size) {
   unsigned int i;
-  for (i = 0; i < size; i++) dst[i] = tgt;
+  for (i = 0; i < size; i++) dst[i] = tgt;
 }
-

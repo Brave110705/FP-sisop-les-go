@@ -23,8 +23,6 @@ void fsRead(struct file_metadata* metadata, enum fs_return* status) {
   int node_index = -1; //buat nyari index, mulai dari -1 sesuai ketentuanny
   byte data_index;
 
-  byte data_index;
-
 
   readSector(&(node_fs_buf.nodes[0]), FS_NODE_SECTOR_NUMBER);        
   readSector(&(node_fs_buf.nodes[32]), FS_NODE_SECTOR_NUMBER);   

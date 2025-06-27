@@ -28,3 +28,11 @@ run:
 generate:
 	gcc test/generate.c test/testlib -o bin/generate
 	bin/generate ${test}
+
+mytest: 
+	gcc test/generate.c test/testlib -o bin/generate
+	bin/generate 1
+
+
+mtr: build mytest run
+
