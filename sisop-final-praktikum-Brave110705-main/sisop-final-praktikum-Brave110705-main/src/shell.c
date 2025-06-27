@@ -482,18 +482,24 @@ void cp(byte cwd, char* src, char* dst) {
         return;
     }
 
+
     dst_idx = cwd; 
     dst_fname = dst;
-
+    //cp <filename> /<outputname> akan menyalin file yang berada di bawah current working directory ke direktori 
+    //root directory.
     if (dst[0] == '/' && dst[1] != '\0') {
         dst_idx   = FS_NODE_P_ROOT;
         dst_fname = dst + 1;
     }
+    //cp <filename> ../<outputname> akan menyalin file yang berada di bawah current working directory ke parent 
+    //directory dari current working directory.
     else if (dst[0] == '.' && dst[1] == '.' && dst[2] == '/') {
         dst_idx   = node_fs_buf.nodes[cwd].parent_index;
         dst_fname = dst + 3;
     }
-
+      
+    // cp <filename> <dirname>/<outputname> akan menyalin file yang berada di bawah current working directory 
+    // ke direktori yang berada di bawah current working directory.
     else {
         for (i = 0; dst[i] != '\0'; i++) {
             if (dst[i] == '/') {
